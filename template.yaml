@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  go-reader
+  
+  Sample SAM Template for go-reader
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 5
+
+Resources:
+  GoReaderFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: go-reader/
+      Handler: handler
+      Runtime: go1.x
+      Architectures:
+        - x86_64
+      Events:
+        CatchAll:
+          Type: HttpApi # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /
+            Method: GET
+            ApiId: !Ref GoReaderHTTPApi
+
+  GoReaderHTTPApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowOrigins:
+          - "*"
+        AllowHeaders:
+          - "Content-Type"
+          - "Access-Control-Allow-Origin"
+          - "Access-Control-Allow-Headers"
+        AllowMethods:
+          - GET
+
+Outputs:
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  GoReaderAPI:
+    Description: "API Gateway endpoint URL for Prod environment for First Function"
+    Value: !Sub "https://${GoReaderHTTPApi}.execute-api.${AWS::Region}.amazonaws.com/"
+  GoReaderFunction:
+    Description: "First Lambda Function ARN"
+    Value: !GetAtt GoReaderFunction.Arn
+  GoReaderFunctionIamRole:
+    Description: "Implicit IAM Role created for Hello World function"
+    Value: !GetAtt GoReaderFunction.Arn
